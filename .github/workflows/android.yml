@@ -1,23 +1,40 @@
-name: Build using Buildozer
+name: Build APK
 
-on: [push, pull_request]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
     steps:
       - uses: actions/checkout@v3
       
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Set up JDK
+        uses: actions/setup-java@v3
         with:
-          python-version: '3.9'
+          java-version: '11'
+          distribution: 'temurin'
       
-      - name: Install Buildozer
+      - name: Accept Android SDK Licenses
         run: |
-          pip install buildozer cython
-          pip install kivy
+          yes | $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager --licenses
+      
+      - name: Install Android SDK Build-Tools
+        run: |
+          $ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager "build-tools;36.1.0"
       
       - name: Build APK
         run: |
+          # Your build command here
+          # Example: ./gradlew assembleDebug
           buildozer android debug
+      
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-debug.apk
+          path: bin/*.apk
