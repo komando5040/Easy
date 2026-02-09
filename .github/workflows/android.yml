@@ -1,14 +1,25 @@
-name: Build APK
+name: Simple Android Build
+
 on: workflow_dispatch
+
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - run: |
-          pip3 install buildozer
-          buildozer android debug
-      - uses: actions/upload-artifact@v4
-        with:
-          name: app
-          path: bin/*.apk
+    - uses: actions/checkout@v4
+    
+    - name: Install everything needed
+      run: |
+        # نصب وابستگی‌های سیستم
+        sudo apt update
+        sudo apt install -y python3-pip python3-dev
+        # نصب پایتون پکیج‌ها
+        pip3 install buildozer cython
+        
+    - name: Build APK
+      run: buildozer android debug
+      
+    - uses: actions/upload-artifact@v4
+      with:
+        name: app
+        path: bin/*.apk
