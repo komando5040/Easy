@@ -1,36 +1,23 @@
-name: Build with Docker (No License Issues)
+name: Build using Buildozer
 
-on:
-  workflow_dispatch:
-  push:
+on: [push, pull_request]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Build using Docker image with pre-accepted licenses
-        run: |
-          docker run --rm \
-            -v "$(pwd):/src" \
-            -e ANDROID_SDK_ROOT=/opt/android-sdk \
-            malthus/buildozer:latest \
-            bash -c "
-            cd /src
-            echo 'Building APK...'
-            buildozer android debug
-            "
-
-      - name: Show buildozer output files (for debug)
-        run: |
-          ls -lh bin || echo "bin directory not found"
-          find bin || echo "No files in bin"
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+      - uses: actions/checkout@v3
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          name: app-apk
-          path: bin/*.apk
-          if-no-files-found: warn  # اگر فایلی نبود فقط هشدار بده، fail نشه
+          python-version: '3.9'
+      
+      - name: Install Buildozer
+        run: |
+          pip install buildozer cython
+          pip install kivy
+      
+      - name: Build APK
+        run: |
+          buildozer android debug
