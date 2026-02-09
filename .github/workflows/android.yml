@@ -1,4 +1,4 @@
-name: Simple Android Build
+name: Build with Docker (No License Issues)
 
 on: workflow_dispatch
 
@@ -8,18 +8,20 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
-    - name: Install everything needed
+    - name: Build using Docker image with pre-accepted licenses
       run: |
-        # نصب وابستگی‌های سیستم
-        sudo apt update
-        sudo apt install -y python3-pip python3-dev
-        # نصب پایتون پکیج‌ها
-        pip3 install buildozer cython
-        
-    - name: Build APK
-      run: buildozer android debug
-      
-    - uses: actions/upload-artifact@v4
+        docker run --rm \
+          -v "$(pwd):/src" \
+          -e ANDROID_SDK_ROOT=/opt/android-sdk \
+          malthus/buildozer:latest \
+          bash -c "
+          cd /src
+          echo 'Building APK...'
+          buildozer android debug
+          "
+          
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
       with:
-        name: app
+        name: app-apk
         path: bin/*.apk
